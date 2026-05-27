@@ -1,0 +1,8 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      ADMIN_GROUP_ID: ${ADMIN_GROUP_ID}
+      MINI_APP_BASE_URL: ${MINI_APP_BASE_URL}
