@@ -2,10 +2,12 @@ import asyncio
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
+from aiohttp import web
 
 from access import is_admin
-from config import ADMIN_GROUP_ID, BOT_TOKEN, MINI_APP_BASE_URL
+from config import ADMIN_GROUP_ID, BOT_NOTIFY_HOST, BOT_NOTIFY_PORT, BOT_TOKEN, MINI_APP_BASE_URL
 from keyboards import admin_keyboard
+from notify import create_notify_app
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
@@ -44,7 +46,16 @@ async def fallback(message: Message) -> None:
 
 
 async def main() -> None:
-    await dp.start_polling(bot)
+    notify_runner = web.AppRunner(create_notify_app(bot))
+    await notify_runner.setup()
+    notify_site = web.TCPSite(notify_runner, BOT_NOTIFY_HOST, BOT_NOTIFY_PORT)
+    await notify_site.start()
+
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await notify_runner.cleanup()
+        await bot.session.close()
 
 
 if __name__ == "__main__":
