@@ -14,22 +14,33 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 
+# 1. Хэндлер для ГРУПП и ЛИЧНЫХ СООБЩЕНИЙ
 @dp.message()
 async def handle_message(message: types.Message):
     if message.chat.type in ['group', 'supergroup']:
         print("\n" + "=" * 40)
-        print(f"Группа:  {message.chat.title}")
-        print(f"ID чата: {message.chat.id}")
-        print(f"От кого: @{message.from_user.username or message.from_user.first_name}")
-        print(f"Текст:   {message.text or '[Медиа/Служебное]'}")
+        print(f"👥 ГРУППА: {message.chat.title}")
+        print(f"ID группы: {message.chat.id}")
+        print(f"Текст:     {message.text or '[Медиа]'}")
         print("=" * 40)
     else:
-        print(f"[Инфо] Сообщение из ЛС ({message.chat.type}). Отправьте в группу.")
+        print(f"[Инфо] Сообщение из ЛС ({message.chat.type}). ID пользователя: {message.chat.id}")
+
+
+# 2. Хэндлер для КАНАЛОВ (Новый)
+@dp.channel_post()
+async def handle_channel_post(channel_post: types.Message):
+    print("\n" + "=" * 40)
+    print(f"📢 КАНАЛ:   {channel_post.chat.title}")
+    print(f"ID канала: {channel_post.chat.id}")
+    print(f"Пост:      {channel_post.text or '[Медиа]'}")
+    print("=" * 40)
 
 
 async def main():
     print("Бот успешно запущен!")
-    print("Можете писать в группу. Для остановки нажмите Ctrl + C")
+    print("Можете писать в группу или публиковать пост в канале.")
+    print("Для остановки нажмите Ctrl + C")
     print("-" * 50)
 
     await bot.delete_webhook(drop_pending_updates=True)
